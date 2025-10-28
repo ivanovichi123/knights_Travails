@@ -1,0 +1,1 @@
+Algorithm that shows the shortest way form a knight to get form one square to another
