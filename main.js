@@ -1,10 +1,71 @@
-//Mi grafo es el tablero
-//Usar algortimo y uno de busqueda para ver el camino mas corot (idea: bst)
-//Usae queue
+import {Tree} from "./BSTA.js";
 
-console.log("hey");
-function knightMoves(begin) {
+function knightMoves(begin, end) {
+    if ((begin[0] < 0 || begin[0] > 7) || (begin[1] < 0 || begin[1] > 7) || (end[0] < 0 || end[0] > 7) || (end[1] < 0 || end[1] > 7)) {
+        return "The coordinates are wrong, remember the grid is only 8 * 8 starting at zero";
+    } else if (begin[0] === end[0] && begin[1] === end[1]) {
+        return begin;
+    }
+    let counter = 0;
+    let theStopper = true;
+    let theQueue = [];
+    let theCorrectCor = 0;
+    let theTraversal = [];
+
     console.log(nextSteps(begin));
+
+    let possibleMovesArray = nextSteps(begin);
+    for (let i = 0; i < possibleMovesArray.length; i++) {
+        theQueue.push(possibleMovesArray[i]);
+    }
+
+    console.log(theQueue);
+
+    let stepsTree = new Tree();
+    stepsTree.buildTree(possibleMovesArray, begin);
+
+    console.log(stepsTree.getRoot.getCoordinate);
+    for(let i = 1; i < 9; i++) {
+        console.log(stepsTree.getRoot[`getCor${i}`]);
+    }
+    console.log(stepsTree.getRoot.getCor1.getCoordinate);
+    console.log(stepsTree.getRoot.getCor2.getCoordinate);
+
+    while (theStopper ===  true) {
+        let nextMove = theQueue.splice(0,1);
+        let newMoves = nextSteps(nextMove[0]);
+
+        console.log("new Moves: ", newMoves);
+
+        let finalFound = stepsTree.insert(newMoves, end);
+        if(finalFound[0]) {
+            theCorrectCor = finalFound[1];
+            theStopper = false;
+        } else {
+        }       
+        counter += 1;
+        if(counter === 2) {
+            theStopper = false;
+        } 
+    }   
+
+    if(theCorrectCor !== 0) {
+
+        console.log("The correct coordinates: ", theCorrectCor.getCoordinate);
+
+        theTraversal.unshift(theCorrectCor.getCoordinate);
+        theCorrectCor = theCorrectCor.getFather;
+        while(theCorrectCor !== null) {
+            theTraversal.unshift(theCorrectCor.getCoordinate);
+            theCorrectCor = theCorrectCor.getFather;
+        }
+    }
+    return theTraversal;
+
+
+    
+
+
 }
 
 //Function that gives the next possible steps
@@ -38,9 +99,13 @@ function nextSteps(coordinates) {
     return totalMoves;
 }
 
-knightMoves([6,5]); 
+console.log(knightMoves([0,0],[0,0])); 
 
 
-//PLAN
-//crear dinamicamente los posibles movimientos en el tablero: LISTO
-//ENCONTRAR EL CAMINO DE UNA COORDENADA A OTRA (SIN CHECAR SI ES EL MAS CORTO O NO): NO
+//COSAS POR ARREGLAR:
+//CHECAR CUANDO INICIO Y FINAL SEAN IGUALES: LISTO
+//CHECAR QUE INICIO Y FINAL SEAN COORDENADAS VALIDAS: LISTO 
+//HACER QUE EL WHILE DEL QUEUE SIGA POR MAS DE DOS VECES
+//HACER QUE EL NEXT Y NEXTFATHER SE MUEVAN PARA MAS RAMAS
+//CHECAR QUE NO HAYA MAS ERRORES
+//COMENTAR
