@@ -1,6 +1,7 @@
+//Class of the nodes
 class Node {
     #coordinates; //Value of the node
-    #cor1;
+    #cor1;        //The next coordinate of the node (A knight in chess normally has 8 possible movements)
     #cor2;
     #cor3;
     #cor4;
@@ -8,8 +9,8 @@ class Node {
     #cor6;
     #cor7;
     #cor8;
-    #counter;
-    #father;
+    #counter;   //Variable that tells how many children of the father have been filled
+    #father;    //Father of the node
 
     //Constructor
     constructor (coordinates = 0, cor1 = null, cor2 = null, cor3 = null, cor4 = null, cor5 = null, cor6 = null, cor7 = null, cor8 = null, counter = 1, father = null) {
@@ -115,12 +116,13 @@ class Node {
     }
 }
 
+//Class of the tree
 class Tree {
     #root;      //Root of the tree
-    #next;
-    #nextFather;
-    #levelOrder;
-    #nodesUse;
+    #next;      //Node that will receive the next moves
+    #nextFather;    //Father of the node that will receive the next moves
+    #levelOrder;    //Stores the level order of the nodes
+    #nodesUse;      //Store a number that tells how much nodes have been already fill
 
     constructor(root = 0, next = 0, nextFather = 0, levelOrder = 0, nodesUse = 0) {
         this.#root = root;
@@ -140,15 +142,24 @@ class Tree {
 
     //Functions that builds the tree
     buildTree(array, root) {
+        //Create a new node
         let rootNode = new Node(root);
+        //Root points to the node
         this.#root = rootNode;
+        //For loop that goes through the array of the next moves of the root
         for(let i = 0; i < array.length; i++) {
+            //Create a new leaf node
             let leafNode = new Node(array[i]);
+            //Set the respective coordinate
             this.#root[`setCor${i + 1}`](leafNode);
+            //Point to the father
             leafNode.setFather(this.#root);
         }
+        //Set the father of the next
         this.#nextFather = this.#root;
+        //Set the next to the first child of the root
         this.#next = this.#root.getCor1;
+        //Store the level order
         this.#levelOrder = this.levelOrder(this.#root, this.#nodesUse);
         //Return the root
         return this.#root;
@@ -156,47 +167,58 @@ class Tree {
 
     //Function that inserts a new value
     insert(coordinates, end) {
-        while(this.#next === null) { //IDEA CAMBIAR ESTE IF A UN WHILE
-            console.log("The next is null");
+        //While loop that stops when the next is null (when all the children of the next father have been fill with moves)
+        while(this.#next === null) {
+            //Get the front element in the level order
             this.#levelOrder.splice(0,1);
+            //Increase the amount of nodes use
             this.#nodesUse += 1;
+            //Check if the level order is empty
             if(this.#levelOrder.length === 0) {
+                //Store a new level order 
                 this.#levelOrder = this.levelOrder(this.#root, this.#nodesUse);
-                console.log("The new level order: ", this.#levelOrder);
             }
 
+            //The new next father is the next node in the level order
             this.#nextFather = this.#levelOrder[0];
-            console.log("The new value of the nextFather: ", this.#nextFather.getCoordinate);
+            //The new next value is the first node of the next father
             this.#next = (this.#nextFather[`getCor${this.#nextFather.getCounter}`]);
-
         }
+
+        //Get the node that will store the next moves
         let currentNode = this.#next;
-        console.log("The current Node: ", currentNode.getCoordinate);
-        console.log("The coordinates: ", coordinates, "Have a length of: ", coordinates.length);
+        //For loop that sets all the next moves
         for(let i = 0; i < coordinates.length; i++) {
+            //Create a new node
             let leafNode = new Node(coordinates[i]);
-            console.log("The leaf Node: ", leafNode.getCoordinate, "Is son of: ", currentNode.getCoordinate);
+            //Set the new node
             currentNode[`setCor${i + 1}`](leafNode);
+            //Set the father
             leafNode.setFather(currentNode);
+            //Check if the new move is the final coordinate we are searching
             if(coordinates[i][0] === end[0] && coordinates[i][1] === end[1]) {
-                console.log("I found the coordinate");
+                //Return the node with the end coordinate
                 return [true, leafNode];
             }
         }
+
+        //Make that the nextFather counter increase (meaning that one of his children have already been fill)
         this.#nextFather.setCounter(this.#nextFather.getCounter + 1);
-        console.log("The new counter of the nextFather is: ", this.#nextFather.getCounter);
+        //Check if the counter is greater than eight (all the children have been fill)
         if(this.#nextFather.getCounter > 8) {
-            console.log("The counter of nextFather is bigger than 8");
+            //Set next to null, to make that in the next call nodeFather change its value
             this.#next = null;
         } else {
+            //Next now is the next child of the nextFather
             this.#next = (this.#nextFather[`getCor${this.#nextFather.getCounter}`]);
-            console.log("The new value of the next is: ", (this.#next === null) ? "null" : this.#next.getCoordinate);
         }
+        //Return false if the end coordinate was not found
         return false;
     }
 
+    //Function that returns the level order of the tree
     levelOrder(node, useAlready) {
-        console.log("Level order start");
+        //Array that will store the nodes
         let theStorage = [];
         //Create an array that will function like a queue
         let theQueue = [];
@@ -208,57 +230,61 @@ class Tree {
         while (theQueue.length !== 0) {
             //Get the front element of the array
             let theFront = theQueue.splice(0,1);
+            //Store the node
             theStorage.push(theFront[0]);
-            console.log(theFront[0].getCoordinate);
-            //Temporal function is the value of the front of the list
+            //Temporal is the root (the beginning of the tree)
             temporalNode = theFront[0];
-            //If there is a node in the left
+            //If there is a node in the coordinate 1
             if(temporalNode.getCor1 != null) {
-                //Push the left child in the array
+                //Push the coordinate in the queue
                 theQueue.push(temporalNode.getCor1);
             }
+            //If there is a node in the coordinate 2
             if(temporalNode.getCor2 != null) {
-                //Push the left child in the array
+                //Push the coordinate in the queue
                 theQueue.push(temporalNode.getCor2);
             }
+            //If there is a node in the coordinate 3
             if(temporalNode.getCor3 != null) {
-                //Push the left child in the array
+                //Push the coordinate in the queue
                 theQueue.push(temporalNode.getCor3);
             }
+            //If there is a node in the coordinate 4
             if(temporalNode.getCor4 != null) {
-                //Push the left child in the array
+                //Push the coordinate in the queue
                 theQueue.push(temporalNode.getCor4);
             }
+            //If there is a node in the coordinate 5
             if(temporalNode.getCor5 != null) {
-                //Push the left child in the array
+                //Push the coordinate in the queue
                 theQueue.push(temporalNode.getCor5);
             }
+            //If there is a node in the coordinate 6
             if(temporalNode.getCor6 != null) {
-                //Push the left child in the array
+                //Push the coordinate in the queue
                 theQueue.push(temporalNode.getCor6);
             }
+            //If there is a node in the coordinate 7
             if(temporalNode.getCor7 != null) {
-                //Push the left child in the array
+                //Push the coordinate in the queue
                 theQueue.push(temporalNode.getCor7);
             }
+            //If there is a node in the coordinate 8
             if(temporalNode.getCor8 != null) {
-                //Push the left child in the array
+                ///Push the coordinate in the queue
                 theQueue.push(temporalNode.getCor8);
             }
         }
-        console.log("Level order finish");
+
+        //Check if the already use nodes is more than 0
         if(useAlready > 0) {
+            //Delete the from the beginning to the number of nodes that we already use
             theStorage.splice(0,useAlready);
         }
+
+        //Return the array with the nodes
         return theStorage;
     }
 }
-
-    // preOrderForEach(callback, node = this.#root) {
-    // }
-
-    // depth(value, node = this.#root, count = 0) {
-    // }
-
 
 export {Tree};
